@@ -1,1 +1,1 @@
-# udacity_java_web_developer
+# Udacity Java Web Developer
