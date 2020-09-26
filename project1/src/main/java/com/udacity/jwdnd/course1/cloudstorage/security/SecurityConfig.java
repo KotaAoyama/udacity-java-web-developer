@@ -13,8 +13,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationService authenticationService;
 
+    public SecurityConfig(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    public void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(this.authenticationService);
     }
 
@@ -23,11 +27,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/signup", "/css/**", "/js/**").permitAll()
                 .anyRequest().authenticated();
+
         http.formLogin()
                 .loginPage("/login")
                 .permitAll();
+
         http.formLogin()
                 .defaultSuccessUrl("/home", true);
+
         http.logout()
                 .logoutSuccessUrl("/login");
     }
