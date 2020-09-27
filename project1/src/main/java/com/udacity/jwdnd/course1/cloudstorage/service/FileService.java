@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -19,13 +20,20 @@ public class FileService {
         this.fileMapper = fileMapper;
     }
 
+    public List<File> getFiles(String userName) {
+        User user = userService.getUser(userName);
+        if (Objects.isNull(user)) {
+            return null;
+        }
+        return fileMapper.getFiles(user.getUserId());
+    }
+
     public int uploadFile(MultipartFile fileUpload, String userName) throws Exception {
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
             throw new Exception(String.format("User is Not Found by the userName, %s", userName));
         }
 
-        Integer userId = user.getUserId();
         byte[] fileData = null;
         try {
             fileData = fileUpload.getBytes();
@@ -35,10 +43,10 @@ public class FileService {
 
         return fileMapper.insert(new File(
                 null,
-                fileUpload.getName(),
+                fileUpload.getOriginalFilename(),
                 fileUpload.getContentType(),
                 fileUpload.getSize(),
-                userId,
+                user.getUserId(),
                 fileData));
     }
 }

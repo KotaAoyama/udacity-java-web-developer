@@ -45,7 +45,8 @@ public class SignupController {
             model.addAttribute("signupSccess", true);
         } else {
             System.out.println("signupError!");
-            model.addAttribute("signupError", signupError);
+            model.addAttribute("signupError", true);
+            model.addAttribute("errorMessage", signupError);
         }
 
         return "signup";
