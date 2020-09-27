@@ -2,7 +2,6 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.service.FileService;
-import com.udacity.jwdnd.course1.cloudstorage.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,23 +20,24 @@ public class HomeController {
 
     private final FileService fileService;
 
-    private final UserService userService;
-
-    public HomeController(FileService fileService, UserService userService) {
+    public HomeController(FileService fileService) {
         this.fileService = fileService;
-        this.userService = userService;
     }
 
     @GetMapping()
     public String homeView(Authentication auth, Model model) {
-        List<File> files = fileService.getFiles(auth.getName());
-        model.addAttribute("files", files);
+        showFiles(auth.getName(), model);
         return "home";
     }
 
     @PostMapping("/file/upload")
     public String uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
                              Authentication auth, Model model) {
+
+        if (fileUpload.getSize() == 0) {
+            showFiles(auth.getName(), model);
+            return "home";
+        }
 
         String uploadError = null;
         try {
@@ -51,14 +51,21 @@ public class HomeController {
 
         if (uploadError == null) {
             model.addAttribute("uploadSuccess", true);
-            System.out.println("upload Success!!!!");
         } else {
             model.addAttribute("uploadError", true);
-            System.out.println("upload Fail!!!!!");
+            model.addAttribute("uploadErrorMessage", uploadError);
         }
+        showFiles(auth.getName(), model);
 
-        List<File> files = fileService.getFiles(auth.getName());
-        model.addAttribute("files", files);
+        return "home";
+    }
+
+    @GetMapping("/file/upload/error")
+    public String uploadError(Authentication auth, Model model) {
+
+        showFiles(auth.getName(), model);
+        model.addAttribute("uploadError", true);
+        model.addAttribute("uploadErrorMessage", "File size is too large.");
 
         return "home";
     }
@@ -79,5 +86,10 @@ public class HomeController {
                         targetFile.getFileName() + "\"")
                 .contentType(MediaType.valueOf(targetFile.getContentType()))
                 .body(targetFile.getFileData());
+    }
+
+    private void showFiles(String userName, Model model) {
+        List<File> files = fileService.getFiles(userName);
+        model.addAttribute("files", files);
     }
 }
