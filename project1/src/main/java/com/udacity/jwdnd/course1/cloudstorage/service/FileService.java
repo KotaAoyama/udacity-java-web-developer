@@ -28,6 +28,10 @@ public class FileService {
         return fileMapper.getFiles(user.getUserId());
     }
 
+    public File getFileById(Integer fileId) {
+        return fileMapper.getFileById(fileId);
+    }
+
     public int uploadFile(MultipartFile fileUpload, String userName) throws Exception {
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
@@ -48,5 +52,13 @@ public class FileService {
                 fileUpload.getSize(),
                 user.getUserId(),
                 fileData));
+    }
+
+    public boolean isFileDownloadable(File targetFile, String userName) {
+        User user = userService.getUser(userName);
+        if (Objects.isNull(user)) {
+            return false;
+        }
+        return targetFile.getUserId() == user.getUserId();
     }
 }

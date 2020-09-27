@@ -1,7 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
-import com.udacity.jwdnd.course1.cloudstorage.service.AuthenticationService;
 import com.udacity.jwdnd.course1.cloudstorage.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,12 +42,12 @@ public class SignupController {
         if (signupError == null) {
             System.out.println("signupSuccess!");
             model.addAttribute("signupSccess", true);
+            return "login";
         } else {
             System.out.println("signupError!");
             model.addAttribute("signupError", true);
             model.addAttribute("errorMessage", signupError);
+            return "signup";
         }
-
-        return "signup";
     }
 }
