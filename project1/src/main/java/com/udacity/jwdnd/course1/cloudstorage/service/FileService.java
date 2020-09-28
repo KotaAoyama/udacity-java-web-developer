@@ -4,7 +4,6 @@ import com.udacity.jwdnd.course1.cloudstorage.mapper.FileMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -55,7 +54,11 @@ public class FileService {
                 fileData));
     }
 
-    public boolean isFileDownloadable(File targetFile, String userName) {
+    public int deleteFile(Integer fileId) {
+        return fileMapper.delete(fileId);
+    }
+
+    public boolean isFileAllowed(File targetFile, String userName) {
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
             return false;

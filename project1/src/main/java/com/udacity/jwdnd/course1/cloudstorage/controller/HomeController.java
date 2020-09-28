@@ -43,7 +43,7 @@ public class HomeController {
         try {
             int rowsAdded = fileService.uploadFile(fileUpload, auth.getName());
             if (rowsAdded < 0) {
-                uploadError = "There was sn error uploading file. Please try again.";
+                uploadError = "There was an error uploading file. Please try again.";
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,10 +74,7 @@ public class HomeController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable Integer fileId, Authentication auth) {
 
         File targetFile = fileService.getFileById(fileId);
-        if (Objects.isNull(targetFile)) {
-            return null;
-        }
-        if (!fileService.isFileDownloadable(targetFile, auth.getName())) {
+        if (Objects.isNull(targetFile) || !fileService.isFileAllowed(targetFile, auth.getName())) {
             return null;
         }
 
@@ -87,6 +84,36 @@ public class HomeController {
                 .contentType(MediaType.valueOf(targetFile.getContentType()))
                 .body(targetFile.getFileData());
     }
+
+    @GetMapping("/file/{fileId}/delete")
+    public String deleteFile(@PathVariable Integer fileId, Authentication auth, Model model) {
+
+        File targetFile = fileService.getFileById(fileId);
+        if (Objects.isNull(targetFile) || !fileService.isFileAllowed(targetFile, auth.getName())) {
+            return "404";
+        }
+
+        String deleteError = null;
+        try {
+            int rowsDeleted = fileService.deleteFile(fileId);
+            if (rowsDeleted < 0) {
+                deleteError = "There was an error deleting file. Please try again.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (deleteError == null) {
+            model.addAttribute("deleteSuccess", true);
+        } else {
+            model.addAttribute("deleteError", true);
+            model.addAttribute("deleteErrorMessage", deleteError);
+        }
+
+        showFiles(auth.getName(), model);
+        return "home";
+    }
+
 
     private void showFiles(String userName, Model model) {
         List<File> files = fileService.getFiles(userName);
