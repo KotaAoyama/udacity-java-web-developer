@@ -34,19 +34,32 @@ public class HomeController {
     public String uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
                              Authentication auth, Model model) {
 
+        String userName = auth.getName();
         if (fileUpload.getSize() == 0) {
-            showFiles(auth.getName(), model);
+            showFiles(userName, model);
             return "home";
         }
 
         String uploadError = null;
         try {
-            int rowsAdded = fileService.uploadFile(fileUpload, auth.getName());
-            if (rowsAdded < 0) {
-                uploadError = "There was an error uploading file. Please try again.";
+            if (fileService.isFileDuplicated(fileUpload, userName)) {
+                uploadError = "File is duplicated.";
             }
         } catch (Exception e) {
             e.printStackTrace();
+            uploadError = "There was an error uploading file.";
+        }
+
+        if (uploadError == null) {
+            try {
+                int rowsAdded = fileService.uploadFile(fileUpload, auth.getName());
+                if (rowsAdded < 0) {
+                    uploadError = "There was an error uploading file.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                uploadError = "There was an error uploading file.";
+            }
         }
 
         if (uploadError == null) {
@@ -55,7 +68,7 @@ public class HomeController {
             model.addAttribute("uploadError", true);
             model.addAttribute("uploadErrorMessage", uploadError);
         }
-        showFiles(auth.getName(), model);
+        showFiles(userName, model);
 
         return "home";
     }
@@ -74,7 +87,16 @@ public class HomeController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable Integer fileId, Authentication auth) {
 
         File targetFile = fileService.getFileById(fileId);
-        if (Objects.isNull(targetFile) || !fileService.isFileAllowed(targetFile, auth.getName())) {
+        if (Objects.isNull(targetFile)) {
+            return null;
+        }
+
+        try {
+            if (fileService.isFileNotAllowed(targetFile, auth.getName())) {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
@@ -89,18 +111,31 @@ public class HomeController {
     public String deleteFile(@PathVariable Integer fileId, Authentication auth, Model model) {
 
         File targetFile = fileService.getFileById(fileId);
-        if (Objects.isNull(targetFile) || !fileService.isFileAllowed(targetFile, auth.getName())) {
+        String userName = auth.getName();
+        if (Objects.isNull(targetFile)) {
             return "404";
         }
 
         String deleteError = null;
         try {
-            int rowsDeleted = fileService.deleteFile(fileId);
-            if (rowsDeleted < 0) {
-                deleteError = "There was an error deleting file. Please try again.";
+            if (fileService.isFileNotAllowed(targetFile, userName)) {
+                return "404";
             }
         } catch (Exception e) {
             e.printStackTrace();
+            deleteError = "There was an error deleting file.";
+        }
+
+        if (deleteError == null) {
+            try {
+                int rowsDeleted = fileService.deleteFile(fileId);
+                if (rowsDeleted < 0) {
+                    deleteError = "There was an error deleting file.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                deleteError = "There was an error deleting file.";
+            }
         }
 
         if (deleteError == null) {
@@ -110,7 +145,7 @@ public class HomeController {
             model.addAttribute("deleteErrorMessage", deleteError);
         }
 
-        showFiles(auth.getName(), model);
+        showFiles(userName, model);
         return "home";
     }
 

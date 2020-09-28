@@ -21,10 +21,12 @@ public class FileService {
     }
 
     public List<File> getFiles(String userName) {
+
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
             return null;
         }
+
         return fileMapper.getFiles(user.getUserId());
     }
 
@@ -33,6 +35,7 @@ public class FileService {
     }
 
     public int uploadFile(MultipartFile fileUpload, String userName) throws Exception {
+
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
             throw new Exception(String.format("User is Not Found by the userName, %s", userName));
@@ -58,11 +61,24 @@ public class FileService {
         return fileMapper.delete(fileId);
     }
 
-    public boolean isFileAllowed(File targetFile, String userName) {
+    public boolean isFileNotAllowed(File targetFile, String userName) throws Exception {
+
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            return false;
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
         }
-        return targetFile.getUserId() == user.getUserId();
+
+        return targetFile.getUserId() != user.getUserId();
+    }
+
+    public boolean isFileDuplicated(MultipartFile targetFile, String userName) throws Exception {
+
+        User user = userService.getUser(userName);
+        if (Objects.isNull(user)) {
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
+        }
+        List<File> files = fileMapper.getFiles(user.getUserId());
+
+        return files.stream().anyMatch(file -> file.getFileName().equals(targetFile.getOriginalFilename()));
     }
 }
