@@ -25,18 +25,6 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <div th:if="${uploadSuccess}" class="alert alert-success">
-                            <span>Uploaded Successfully!</span>
-                        </div>
-                        <div th:if="${uploadError}" class="alert alert-danger">
-                            <span th:text="${uploadErrorMessage}">Example Upload Error Message</span>
-                        </div>
-                        <div th:if="${deleteSuccess}" class="alert alert-success">
-                            <span>Deleted Successfully!</span>
-                        </div>
-                        <div th:if="${deleteError}" class="alert alert-danger">
-                            <span th:text="${deleteErrorMessage}">Example Upload Error Message</span>
-                        </div>
                         <form action="#" th:action="@{/home/file/upload}" enctype="multipart/form-data" method="POST">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
@@ -88,13 +76,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="note : ${notes}">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button type="button" class="btn btn-success" th:id="note_${note.getNoteId()}">Edit</button>
+                                            <a class="btn btn-danger" th:href="@{/home/note/{noteId}/delete(noteId=${note.getNoteId()})}">Delete</a>
                                         </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
+                                        <th scope="row" th:text="${note.getNoteTitle()}">Example Note Title</th>
+                                        <td th:text="${note.getNoteDescription()}">Example Note Description </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -110,7 +98,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form action="#" th:action="@{/home/note/create}" method="POST">
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -203,8 +191,18 @@
         <script th:src="@{/js/popper.min.js}"></script>
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
-        <!--For opening the note modal-->
         <script type="text/javascript">
+            // For opening active tab
+            $(document).ready(function(){
+                $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+                    localStorage.setItem('activeTab', $(e.target).attr('href'));
+                });
+                const activeTab = localStorage.getItem('activeTab');
+                if(activeTab){
+                    $('#nav-tab a[href="' + activeTab + '"]').tab('show');
+                }
+            });
+
             // For opening the note modal
             function showNoteModal(noteId, noteTitle, noteDescription) {
                 $('#note-id').val(noteId ? noteId : '');
