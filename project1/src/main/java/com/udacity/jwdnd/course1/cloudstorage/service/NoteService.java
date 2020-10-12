@@ -45,4 +45,21 @@ public class NoteService {
                 user.getUserId()
         ));
     }
+
+    public Note getNoteById(Integer noteId) {
+        return noteMapper.getNoteById(noteId);
+    }
+
+    public int deleteNote(Integer noteId) {
+        return noteMapper.delete(noteId);
+    }
+
+    public boolean isNoteNotAllowed(Note targetNote, String userName) throws Exception {
+        User user = userService.getUser(userName);
+        if (Objects.isNull(user)) {
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
+        }
+
+        return targetNote.getUserId() != user.getUserId();
+    }
 }

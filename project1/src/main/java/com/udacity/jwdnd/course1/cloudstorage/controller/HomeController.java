@@ -113,14 +113,13 @@ public class HomeController {
                              RedirectAttributes redirectAttributes) {
 
         File targetFile = fileService.getFileById(fileId);
-        String userName = auth.getName();
         if (Objects.isNull(targetFile)) {
             return "404";
         }
 
         String deleteError = null;
         try {
-            if (fileService.isFileNotAllowed(targetFile, userName)) {
+            if (fileService.isFileNotAllowed(targetFile, auth.getName())) {
                 return "404";
             }
         } catch (Exception e) {
@@ -174,6 +173,47 @@ public class HomeController {
         } else {
             redirectAttributes.addAttribute("saveErrorMessage", saveError);
             return "redirect:/result?saveError";
+        }
+    }
+
+
+    @GetMapping("/note/{noteId}/delete")
+    public String deleteNote(@PathVariable Integer noteId,
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
+
+        Note targetNote = noteService.getNoteById(noteId);
+        if (Objects.isNull(targetNote)) {
+            return "404";
+        }
+
+        String deleteError = null;
+        try {
+            if (noteService.isNoteNotAllowed(targetNote, auth.getName())) {
+                return "404";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            deleteError = "There was an error deleting note.";
+        }
+
+        if (deleteError == null) {
+            try {
+                int rowsDeleted = noteService.deleteNote(noteId);
+                if (rowsDeleted < 0) {
+                    deleteError = "There was an error deleting note.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                deleteError = "There was an error deleting note.";
+            }
+        }
+
+        if (deleteError == null) {
+            return "redirect:/result?deleteSuccess";
+        } else {
+            redirectAttributes.addAttribute("deleteErrorMessage", deleteError);
+            return "redirect:/result?deleteError";
         }
     }
 

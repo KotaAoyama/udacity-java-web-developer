@@ -52,10 +52,10 @@
                                 <tbody>
                                     <tr th:each="file : ${files}">
                                         <td>
-                                            <a target="_blank" class="btn btn-success" th:href="@{/home/file/{fileId}/download(fileId=${file.getFileId()})}">View</a>
-                                            <a class="btn btn-danger" th:href="@{/home/file/{fileId}/delete(fileId=${file.getFileId()})}">Delete</a>
+                                            <a target="_blank" class="btn btn-success" th:href="@{/home/file/{fileId}/download(fileId=${file.fileId})}">View</a>
+                                            <a class="btn btn-danger" th:href="@{/home/file/{fileId}/delete(fileId=${file.fileId})}">Delete</a>
                                         </td>
-                                        <th scope="row" th:text="${file.getFileName()}">ExampleFile.txt</th>
+                                        <th scope="row" th:text="${file.fileName}">ExampleFile.txt</th>
                                     </tr>
                                 </tbody>
                             </table>
