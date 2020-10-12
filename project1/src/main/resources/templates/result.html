@@ -30,6 +30,16 @@
                 <span th:text="${deleteErrorMessage}"></span>
                 <span> Click <a th:href="@{/home}">here</a> to continue.</span>
             </div>
+            <div th:if="${param.saveSuccess}" class="alert alert-success fill-parent">
+                <h1 class="display-5">Success</h1>
+                <span>Saved Successfully!</span>
+                <span> Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
+            <div th:if="${param.saveError}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span th:text="${param.saveErrorMessage}"></span>
+                <span> Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
         </div>
     </body>
 </html>

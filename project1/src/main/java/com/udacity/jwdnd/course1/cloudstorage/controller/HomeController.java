@@ -1,7 +1,10 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.model.Note;
+import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.service.FileService;
+import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +23,18 @@ import java.util.Objects;
 public class HomeController {
 
     private final FileService fileService;
+    private final NoteService noteService;
 
-    public HomeController(FileService fileService) {
+    public HomeController(FileService fileService, NoteService noteService) {
         this.fileService = fileService;
+        this.noteService = noteService;
     }
 
 
     @GetMapping()
     public String homeView(Authentication auth, Model model) {
         showFiles(auth.getName(), model);
+        showNotes(auth.getName(), model);
         return "home";
     }
 
@@ -104,7 +110,6 @@ public class HomeController {
     @GetMapping("/file/{fileId}/delete")
     public String deleteFile(@PathVariable Integer fileId,
                              Authentication auth,
-                             Model model,
                              RedirectAttributes redirectAttributes) {
 
         File targetFile = fileService.getFileById(fileId);
@@ -143,8 +148,43 @@ public class HomeController {
         }
     }
 
+
+    @PostMapping("/note/create")
+    public String createNote(NoteForm noteForm,
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
+
+        String userName = auth.getName();
+        String saveError = null;
+        try {
+            int rowsAdded = noteService.createNote(
+                    noteForm.getNoteTitle(),
+                    noteForm.getNoteDescription(),
+                    userName);
+            if (rowsAdded < 0) {
+               saveError = "There was an error creating a note.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            saveError = "There was an error creating a note.";
+        }
+
+        if (saveError == null) {
+            return "redirect:/result?saveSuccess";
+        } else {
+            redirectAttributes.addAttribute("saveErrorMessage", saveError);
+            return "redirect:/result?saveError";
+        }
+    }
+
+
     private void showFiles(String userName, Model model) {
         List<File> files = fileService.getFiles(userName);
         model.addAttribute("files", files);
+    }
+
+    private void showNotes(String userName, Model model) {
+        List<Note> notes = noteService.getNotes(userName);
+        model.addAttribute("notes", notes);
     }
 }

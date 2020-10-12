@@ -38,7 +38,7 @@ public class FileService {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
+            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
         }
 
         byte[] fileData = null;
