@@ -149,9 +149,9 @@ public class HomeController {
 
 
     @PostMapping("/note/save")
-    public String createNote(NoteForm noteForm,
-                             Authentication auth,
-                             RedirectAttributes redirectAttributes) {
+    public String saveNote(NoteForm noteForm,
+                           Authentication auth,
+                           RedirectAttributes redirectAttributes) {
 
         String userName = auth.getName();
         String saveError = null;
