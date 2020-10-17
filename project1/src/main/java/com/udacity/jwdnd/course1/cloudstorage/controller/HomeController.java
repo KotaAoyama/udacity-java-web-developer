@@ -1,8 +1,11 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
+import com.udacity.jwdnd.course1.cloudstorage.form.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.form.NoteForm;
+import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
+import com.udacity.jwdnd.course1.cloudstorage.service.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.service.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 import org.springframework.http.HttpHeaders;
@@ -24,17 +27,19 @@ public class HomeController {
 
     private final FileService fileService;
     private final NoteService noteService;
+    private final CredentialService credentialService;
 
-    public HomeController(FileService fileService, NoteService noteService) {
+    public HomeController(FileService fileService, NoteService noteService, CredentialService credentialService) {
         this.fileService = fileService;
         this.noteService = noteService;
+        this.credentialService = credentialService;
     }
-
 
     @GetMapping()
     public String homeView(Authentication auth, Model model) {
         showFiles(auth.getName(), model);
         showNotes(auth.getName(), model);
+        showCredentials(auth.getName(), model);
         return "home";
     }
 
@@ -240,13 +245,51 @@ public class HomeController {
     }
 
 
+    @PostMapping("/credential/save")
+    public String saveCredential(CredentialForm credentialForm,
+                                 Authentication auth,
+                                 RedirectAttributes redirectAttributes) {
+
+        String userName = auth.getName();
+        String saveError = null;
+
+        try {
+            int rowsAdded = credentialService.createCredential(
+                    credentialForm.getUrl(),
+                    credentialForm.getUsername(),
+                    credentialForm.getPassword(),
+                    userName);
+            if (rowsAdded < 0) {
+                saveError = "There was an error creating a credential.";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            saveError = "There was an error creating a credential.";
+        }
+
+        if (saveError == null) {
+            return "redirect:/result?saveSuccess";
+        } else {
+            redirectAttributes.addAttribute("saveErrorMessage", saveError);
+            return "redirect:/result?saveError";
+        }
+    }
+
+
     private void showFiles(String userName, Model model) {
         List<File> files = fileService.getFiles(userName);
         model.addAttribute("files", files);
     }
 
+
     private void showNotes(String userName, Model model) {
         List<Note> notes = noteService.getNotes(userName);
         model.addAttribute("notes", notes);
+    }
+
+
+    private void showCredentials(String userName, Model model) {
+        List<Credential> credentials = credentialService.getCredentials(userName);
+        model.addAttribute("credentials", credentials);
     }
 }
