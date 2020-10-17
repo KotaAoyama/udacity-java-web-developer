@@ -1,5 +1,8 @@
 package com.udacity.jwdnd.course1.cloudstorage.model;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class File {
 
     private Integer fileId;
@@ -64,5 +67,37 @@ public class File {
 
     public void setFileData(byte[] fileData) {
         this.fileData = fileData;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        File file = (File) o;
+        return fileSize == file.fileSize &&
+                Objects.equals(fileId, file.fileId) &&
+                Objects.equals(fileName, file.fileName) &&
+                Objects.equals(contentType, file.contentType) &&
+                Objects.equals(userId, file.userId) &&
+                Arrays.equals(fileData, file.fileData);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(fileId, fileName, contentType, fileSize, userId);
+        result = 31 * result + Arrays.hashCode(fileData);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "File{" +
+                "fileId=" + fileId +
+                ", fileName='" + fileName + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", fileSize=" + fileSize +
+                ", userId=" + userId +
+                ", fileData=" + Arrays.toString(fileData) +
+                '}';
     }
 }

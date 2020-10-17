@@ -1,5 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.model;
 
+import java.util.Objects;
+
 public class Credential {
 
     private Integer credentialId;
@@ -64,5 +66,35 @@ public class Credential {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Credential that = (Credential) o;
+        return Objects.equals(credentialId, that.credentialId) &&
+                Objects.equals(url, that.url) &&
+                Objects.equals(username, that.username) &&
+                Objects.equals(key, that.key) &&
+                Objects.equals(password, that.password) &&
+                Objects.equals(userId, that.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(credentialId, url, username, key, password, userId);
+    }
+
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "credentialId=" + credentialId +
+                ", url='" + url + '\'' +
+                ", username='" + username + '\'' +
+                ", key='" + key + '\'' +
+                ", password='" + password + '\'' +
+                ", userId=" + userId +
+                '}';
     }
 }
