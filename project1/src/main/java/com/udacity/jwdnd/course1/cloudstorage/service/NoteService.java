@@ -54,6 +54,10 @@ public class NoteService {
         return noteMapper.delete(noteId);
     }
 
+    public int updateNote(Note note) {
+        return noteMapper.update(note);
+    }
+
     public boolean isNoteNotAllowed(Note targetNote, String userName) throws Exception {
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {

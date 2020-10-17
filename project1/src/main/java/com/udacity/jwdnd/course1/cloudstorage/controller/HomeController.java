@@ -1,8 +1,8 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
+import com.udacity.jwdnd.course1.cloudstorage.form.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
-import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.service.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 import org.springframework.http.HttpHeaders;
@@ -148,24 +148,46 @@ public class HomeController {
     }
 
 
-    @PostMapping("/note/create")
+    @PostMapping("/note/save")
     public String createNote(NoteForm noteForm,
                              Authentication auth,
                              RedirectAttributes redirectAttributes) {
 
         String userName = auth.getName();
         String saveError = null;
-        try {
-            int rowsAdded = noteService.createNote(
-                    noteForm.getNoteTitle(),
-                    noteForm.getNoteDescription(),
-                    userName);
-            if (rowsAdded < 0) {
-               saveError = "There was an error creating a note.";
+
+        if (Objects.isNull(noteForm.getNoteId())) {
+            try {
+                int rowsAdded = noteService.createNote(
+                        noteForm.getNoteTitle(),
+                        noteForm.getNoteDescription(),
+                        userName);
+                if (rowsAdded < 0) {
+                   saveError = "There was an error creating a note.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                saveError = "There was an error creating a note.";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            saveError = "There was an error creating a note.";
+
+        } else {
+            Note targetNote = noteService.getNoteById(noteForm.getNoteId());
+            try {
+                if (noteService.isNoteNotAllowed(targetNote, userName)) {
+                    return "redirect:/404";
+                }
+                int rowsUpdated = noteService.updateNote(
+                        new Note(targetNote.getNoteId(),
+                                noteForm.getNoteTitle(),
+                                noteForm.getNoteDescription(),
+                                targetNote.getUserId()));
+                if (rowsUpdated < 0) {
+                    saveError = "There was an error updating the note.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                saveError = "There was an error updating the note.";
+            }
         }
 
         if (saveError == null) {
