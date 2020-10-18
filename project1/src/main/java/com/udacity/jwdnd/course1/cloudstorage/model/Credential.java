@@ -20,14 +20,6 @@ public class Credential {
         this.userId = userId;
     }
 
-    public Integer getCredentialId() {
-        return credentialId;
-    }
-
-    public void setCredentialId(Integer credentialId) {
-        this.credentialId = credentialId;
-    }
-
     public String getUrl() {
         return url;
     }
@@ -66,6 +58,14 @@ public class Credential {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public Integer getCredentialId() {
+        return credentialId;
+    }
+
+    public void setCredentialId(Integer credentialId) {
+        this.credentialId = credentialId;
     }
 
     @Override

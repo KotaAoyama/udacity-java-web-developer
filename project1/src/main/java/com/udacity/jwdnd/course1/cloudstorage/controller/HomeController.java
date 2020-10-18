@@ -6,6 +6,7 @@ import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.service.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.service.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.service.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 import org.springframework.http.HttpHeaders;
@@ -28,18 +29,22 @@ public class HomeController {
     private final FileService fileService;
     private final NoteService noteService;
     private final CredentialService credentialService;
+    private final EncryptionService encryptionService;
 
-    public HomeController(FileService fileService, NoteService noteService, CredentialService credentialService) {
+    public HomeController(FileService fileService, NoteService noteService, CredentialService credentialService, EncryptionService encryptionService) {
         this.fileService = fileService;
         this.noteService = noteService;
         this.credentialService = credentialService;
+        this.encryptionService = encryptionService;
     }
+
 
     @GetMapping()
     public String homeView(Authentication auth, Model model) {
         showFiles(auth.getName(), model);
         showNotes(auth.getName(), model);
         showCredentials(auth.getName(), model);
+        model.addAttribute("encryptionService", encryptionService);
         return "home";
     }
 
@@ -253,18 +258,35 @@ public class HomeController {
         String userName = auth.getName();
         String saveError = null;
 
-        try {
-            int rowsAdded = credentialService.createCredential(
-                    credentialForm.getUrl(),
-                    credentialForm.getUsername(),
-                    credentialForm.getPassword(),
-                    userName);
-            if (rowsAdded < 0) {
+        if (Objects.isNull(credentialForm.getCredentialId())) {
+            try {
+                int rowsAdded = credentialService.createCredential(
+                        credentialForm.getUrl(),
+                        credentialForm.getUsername(),
+                        credentialForm.getPassword(),
+                        userName);
+                if (rowsAdded < 0) {
+                    saveError = "There was an error creating a credential.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
                 saveError = "There was an error creating a credential.";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            saveError = "There was an error creating a credential.";
+
+        } else {
+            Credential targetCredential = credentialService.getCredentialById(credentialForm.getCredentialId());
+            try {
+                if (credentialService.isCredentialNotAllowed(targetCredential, userName)) {
+                    return "redirect:/404";
+                }
+
+//                if (rowsUpdated < 0) {
+//                    saveError = "There was an error updating the credential.";
+//                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                saveError = "There was an error updating the credential.";
+            }
         }
 
         if (saveError == null) {
