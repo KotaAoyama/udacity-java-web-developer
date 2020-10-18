@@ -23,7 +23,7 @@ public class NoteService {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+            return null;
         }
 
         return noteMapper.getNotes(user.getUserId());
@@ -31,11 +31,11 @@ public class NoteService {
 
     public int createNote(String noteTitle,
                           String noteDescription,
-                          String userName) {
+                          String userName) throws Exception {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
         }
 
         return noteMapper.insert(new Note(

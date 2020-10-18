@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.management.relation.RoleUnresolved;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
@@ -31,17 +32,17 @@ public class CredentialService {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+            return null;
         }
 
         return credentialMapper.getCredentials(user.getUserId());
     }
 
-    public int createCredential(CredentialForm credentialForm, String userName) {
+    public int createCredential(CredentialForm credentialForm, String userName) throws Exception {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
         }
 
         Credential tempCredential = getCredentialWithEncryptedPasswordAndKey(credentialForm.getPassword(), null);
@@ -57,26 +58,24 @@ public class CredentialService {
     }
 
     public Credential getCredentialById(Integer credentialId) {
-
-        Credential targetCredential = credentialMapper.getCredentialById(credentialId);
-        if (Objects.isNull(targetCredential)) {
-            throw new RuntimeException(String.format("No credential by id, %d", credentialId));
-        }
-        return targetCredential;
+        return credentialMapper.getCredentialById(credentialId);
     }
 
     public int deleteCredential(Integer credentialId) {
         return credentialMapper.delete(credentialId);
     }
 
-    public int updateCredential(CredentialForm credentialForm, String userName) {
+    public int updateCredential(CredentialForm credentialForm, String userName) throws Exception {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
-            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+            throw new Exception(String.format("User is Not Found by the userName, %s", userName));
         }
 
         Credential targetCredential = getCredentialById(credentialForm.getCredentialId());
+        if (Objects.isNull(targetCredential)) {
+            throw new Exception(String.format("Credential is Not Found by the credentialId, %d", credentialForm.getCredentialId()));
+        }
         Credential tempCredential = getCredentialWithEncryptedPasswordAndKey(credentialForm.getPassword(), targetCredential.getKey());
 
         return credentialMapper.update(new Credential(

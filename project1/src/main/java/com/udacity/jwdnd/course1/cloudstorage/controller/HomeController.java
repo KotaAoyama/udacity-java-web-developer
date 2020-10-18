@@ -272,6 +272,9 @@ public class HomeController {
         } else {
             try {
                 Credential targetCredential = credentialService.getCredentialById(credentialForm.getCredentialId());
+                if (Objects.isNull(targetCredential)) {
+                    return "404";
+                }
                 if (credentialService.isCredentialNotAllowed(targetCredential, userName)) {
                     return "redirect:/404";
                 }
@@ -293,7 +296,7 @@ public class HomeController {
         }
     }
 
-
+    
     private void showFiles(String userName, Model model) {
         List<File> files = fileService.getFiles(userName);
         model.addAttribute("files", files);
