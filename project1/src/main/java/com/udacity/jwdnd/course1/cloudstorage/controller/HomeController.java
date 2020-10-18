@@ -260,11 +260,7 @@ public class HomeController {
 
         if (Objects.isNull(credentialForm.getCredentialId())) {
             try {
-                int rowsAdded = credentialService.createCredential(
-                        credentialForm.getUrl(),
-                        credentialForm.getUsername(),
-                        credentialForm.getPassword(),
-                        userName);
+                int rowsAdded = credentialService.createCredential(credentialForm, userName);
                 if (rowsAdded < 0) {
                     saveError = "There was an error creating a credential.";
                 }
@@ -274,15 +270,15 @@ public class HomeController {
             }
 
         } else {
-            Credential targetCredential = credentialService.getCredentialById(credentialForm.getCredentialId());
             try {
+                Credential targetCredential = credentialService.getCredentialById(credentialForm.getCredentialId());
                 if (credentialService.isCredentialNotAllowed(targetCredential, userName)) {
                     return "redirect:/404";
                 }
-
-//                if (rowsUpdated < 0) {
-//                    saveError = "There was an error updating the credential.";
-//                }
+                int rowsUpdated = credentialService.updateCredential(credentialForm, userName);
+                if (rowsUpdated < 0) {
+                    saveError = "There was an error updating the credential.";
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 saveError = "There was an error updating the credential.";

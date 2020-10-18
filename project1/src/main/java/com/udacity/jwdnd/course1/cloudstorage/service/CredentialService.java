@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage.service;
 
+import com.udacity.jwdnd.course1.cloudstorage.form.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.CredentialMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
@@ -8,8 +9,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,22 +37,19 @@ public class CredentialService {
         return credentialMapper.getCredentials(user.getUserId());
     }
 
-    public int createCredential(String url,
-                                String username,
-                                String password,
-                                String userName) {
+    public int createCredential(CredentialForm credentialForm, String userName) {
 
         User user = userService.getUser(userName);
         if (Objects.isNull(user)) {
             throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
         }
 
-        Credential tempCredential = getCredentialWithEncryptedPasswordAndKey(password);
+        Credential tempCredential = getCredentialWithEncryptedPasswordAndKey(credentialForm.getPassword(), null);
 
         return credentialMapper.insert(new Credential(
                 null,
-                url,
-                username,
+                credentialForm.getUrl(),
+                credentialForm.getUsername(),
                 tempCredential.getKey(),
                 tempCredential.getPassword(),
                 user.getUserId()
@@ -61,20 +57,36 @@ public class CredentialService {
     }
 
     public Credential getCredentialById(Integer credentialId) {
-        return credentialMapper.getCredentialById(credentialId);
+
+        Credential targetCredential = credentialMapper.getCredentialById(credentialId);
+        if (Objects.isNull(targetCredential)) {
+            throw new RuntimeException(String.format("No credential by id, %d", credentialId));
+        }
+        return targetCredential;
     }
 
     public int deleteCredential(Integer credentialId) {
         return credentialMapper.delete(credentialId);
     }
 
-    public int updateCredential(Credential credential) {
+    public int updateCredential(CredentialForm credentialForm, String userName) {
 
+        User user = userService.getUser(userName);
+        if (Objects.isNull(user)) {
+            throw new RuntimeException(String.format("User is Not Found by the userName, %s", userName));
+        }
 
-        // TODO!!!!
+        Credential targetCredential = getCredentialById(credentialForm.getCredentialId());
+        Credential tempCredential = getCredentialWithEncryptedPasswordAndKey(credentialForm.getPassword(), targetCredential.getKey());
 
-
-        return credentialMapper.update(credential);
+        return credentialMapper.update(new Credential(
+                credentialForm.getCredentialId(),
+                credentialForm.getUrl(),
+                credentialForm.getUsername(),
+                tempCredential.getKey(),
+                tempCredential.getPassword(),
+                user.getUserId()
+        ));
     }
 
     public boolean isCredentialNotAllowed(Credential targetCredential, String userName) throws Exception {
@@ -86,9 +98,11 @@ public class CredentialService {
         return targetCredential.getUserId() != user.getUserId();
     }
 
-    private Credential getCredentialWithEncryptedPasswordAndKey(String password) {
+    private Credential getCredentialWithEncryptedPasswordAndKey(String password, String key) {
 
-        String key = getSecureKey();
+        if (Objects.isNull(key)) {
+            key = getSecureKey();
+        }
 
         return new Credential(
                 null,
