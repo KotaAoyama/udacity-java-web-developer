@@ -296,7 +296,49 @@ public class HomeController {
         }
     }
 
-    
+
+    @GetMapping("/credential/{credentialId}/delete")
+    public String deleteCredential(@PathVariable Integer credentialId,
+                             Authentication auth,
+                             RedirectAttributes redirectAttributes) {
+
+        Credential targetCredential = credentialService.getCredentialById(credentialId);
+        if (Objects.isNull(targetCredential)) {
+            return "404";
+        }
+
+        String deleteError = null;
+        try {
+            if (credentialService.isCredentialNotAllowed(targetCredential, auth.getName())) {
+                return "404";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            deleteError = "There was an error deleting the credential.";
+        }
+
+        if (deleteError == null) {
+            try {
+                int rowsDeleted = credentialService.deleteCredential(targetCredential.getCredentialId());
+                if (rowsDeleted < 0) {
+                    deleteError = "There was an error deleting the credential.";
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                deleteError = "There was an error deleting the credential.";
+            }
+        }
+
+        if (deleteError == null) {
+            return "redirect:/result?deleteSuccess";
+        } else {
+            redirectAttributes.addAttribute("deleteErrorMessage", deleteError);
+            return "redirect:/result?deleteError";
+        }
+    }
+
+
+
     private void showFiles(String userName, Model model) {
         List<File> files = fileService.getFiles(userName);
         model.addAttribute("files", files);
