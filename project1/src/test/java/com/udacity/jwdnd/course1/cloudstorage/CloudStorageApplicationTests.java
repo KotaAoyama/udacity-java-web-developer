@@ -80,6 +80,53 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals(1, rowsAfterCreatingNote.size());
 	}
 
+	@Test
+	@Order(4)
+	public void testEditNote() {
+		signUp();
+		login();
+		goToPage("/home");
+		this.clickButton("nav-notes-tab");
+		this.clickButton("addNoteButton");
+		this.setValueToInput("todo", "note-title");
+		this.setValueToInput("test", "note-description");
+		this.clickButton("saveNoteButton");
+		goToPage("/home");
+		this.clickButton("editNoteButton_1");
+		this.setValueToInput("!", "note-title");
+		this.clickButton("saveNoteButton");
+		goToPage("/home");
+		WebElement tableBodyAfterCreatingNote = driver.findElement(By.id("noteTableBody"));
+		List<WebElement> rowsAfterCreatingNote = tableBodyAfterCreatingNote.findElements(By.tagName("th"));
+		wait.until(ExpectedConditions.textToBePresentInElement(rowsAfterCreatingNote.get(0), "todo!"));
+		Assertions.assertEquals("todo!", rowsAfterCreatingNote.get(0).getText());
+	}
+
+	@Test
+	@Order(5)
+	public void testDeleteNote() {
+		signUp();
+		login();
+		goToPage("/home");
+		this.clickButton("nav-notes-tab");
+		WebElement tableBodyBeforeCreatingNote = driver.findElement(By.id("noteTableBody"));
+		List<WebElement> rowsBeforeCreatingNote = tableBodyBeforeCreatingNote.findElements(By.tagName("th"));
+		Assertions.assertEquals(0, rowsBeforeCreatingNote.size());
+		this.clickButton("addNoteButton");
+		this.setValueToInput("todo", "note-title");
+		this.setValueToInput("test", "note-description");
+		this.clickButton("saveNoteButton");
+		goToPage("/home");
+		WebElement tableBodyAfterCreatingNote = driver.findElement(By.id("noteTableBody"));
+		List<WebElement> rowsAfterCreatingNote = tableBodyAfterCreatingNote.findElements(By.tagName("th"));
+		Assertions.assertEquals(1, rowsAfterCreatingNote.size());
+		this.clickButton("deleteNoteButton_1");
+		goToPage("/home");
+		WebElement tableBodyAfterDeletingNote = driver.findElement(By.id("noteTableBody"));
+		List<WebElement> rowsAfterDeletingNote = tableBodyAfterDeletingNote.findElements(By.tagName("th"));
+		Assertions.assertEquals(0, rowsAfterDeletingNote.size());
+	}
+
 	private void goToPage(String path) {
 		driver.get("http://localhost:" + this.port + path);
 	}

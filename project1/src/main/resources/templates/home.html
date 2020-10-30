@@ -76,10 +76,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="noteTableBody">
-                                    <tr th:each="note : ${notes}">
+                                    <tr th:each="note, iter : ${notes}">
                                         <td>
-                                            <button type="button" class="btn btn-success" th:onclick="javascript:showNoteModal([[${note.noteId}]], [[${note.noteTitle}]], [[${note.noteDescription}]])">Edit</button>
-                                            <a class="btn btn-danger" th:href="@{/home/note/{noteId}/delete(noteId=${note.noteId})}">Delete</a>
+                                            <button type="button" class="btn btn-success" th:id="'editNoteButton_' + ${iter.count}" th:onclick="javascript:showNoteModal([[${note.noteId}]], [[${note.noteTitle}]], [[${note.noteDescription}]])">Edit</button>
+                                            <a class="btn btn-danger" th:id="'deleteNoteButton_' + ${iter.count}" th:href="@{/home/note/{noteId}/delete(noteId=${note.noteId})}">Delete</a>
                                         </td>
                                         <th scope="row" th:text="${note.noteTitle}">Example Note Title</th>
                                         <td th:text="${note.noteDescription}">Example Note Description </td>
