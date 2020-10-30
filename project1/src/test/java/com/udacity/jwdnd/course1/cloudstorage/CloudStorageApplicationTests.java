@@ -78,6 +78,7 @@ class CloudStorageApplicationTests {
 		WebElement tableBodyAfterCreatingNote = driver.findElement(By.id("noteTableBody"));
 		List<WebElement> rowsAfterCreatingNote = tableBodyAfterCreatingNote.findElements(By.tagName("th"));
 		Assertions.assertEquals(1, rowsAfterCreatingNote.size());
+		this.clickButton("deleteNoteButton_1");
 	}
 
 	@Test
@@ -100,6 +101,7 @@ class CloudStorageApplicationTests {
 		List<WebElement> rowsAfterCreatingNote = tableBodyAfterCreatingNote.findElements(By.tagName("th"));
 		wait.until(ExpectedConditions.textToBePresentInElement(rowsAfterCreatingNote.get(0), "todo!"));
 		Assertions.assertEquals("todo!", rowsAfterCreatingNote.get(0).getText());
+		this.clickButton("deleteNoteButton_1");
 	}
 
 	@Test
@@ -149,6 +151,7 @@ class CloudStorageApplicationTests {
 		wait.until(ExpectedConditions.textToBePresentInElement(urlsAfterCreatingCredential.get(0), "https://udacity.com"));
 		Assertions.assertNotNull(passwordsAfterCreatingCredential.get(0).getText());
 		Assertions.assertNotEquals("password", passwordsAfterCreatingCredential.get(0).getText());
+		this.clickButton("deleteCredentialButton_1");
 	}
 
 	@Test
@@ -164,21 +167,17 @@ class CloudStorageApplicationTests {
 		this.setValueToInput("password", "credential-password");
 		this.clickButton("saveCredentialButton");
 		goToPage("/home");
-
-		List<WebElement> urls = driver.findElement(By.id("credentialTable")).findElements(By.className("url"));
-		List<WebElement> passwords = driver.findElement(By.id("credentialTable")).findElements(By.className("password"));
-
-		wait.until(ExpectedConditions.textToBePresentInElement(urls.get(0), "https://udacity.com"));
-		String encryptedPasswordVer1 = passwords.get(0).getText();
+		wait.until(ExpectedConditions.textToBePresentInElement(driver.findElement(By.id("credentialTable")).findElements(By.className("url")).get(0), "https://udacity.com"));
+		String encryptedPasswordVer1 = driver.findElement(By.id("credentialTable")).findElements(By.className("password")).get(0).getText();
 		this.clickButton("editCredentialButton_1");
-		WebElement unencryptedPassword = driver.findElement(By.id("credential-password"));
-		wait.until(ExpectedConditions.textToBePresentInElement(unencryptedPassword,"password"));
-		Assertions.assertEquals("password", unencryptedPassword.getText());
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.id("credential-password"))));
+		Assertions.assertEquals("password", driver.findElement(By.id("credential-password")).getAttribute("value"));
 		this.setValueToInput("!", "credential-password");
 		this.clickButton("saveCredentialButton");
 		goToPage("/home");
-		wait.until(ExpectedConditions.textToBePresentInElement(urls.get(0), "https://udacity.com"));
-		Assertions.assertNotEquals(encryptedPasswordVer1, passwords.get(0).getText());
+		wait.until(ExpectedConditions.textToBePresentInElement(driver.findElement(By.id("credentialTable")).findElements(By.className("url")).get(0), "https://udacity.com"));
+		Assertions.assertNotEquals(encryptedPasswordVer1, driver.findElement(By.id("credentialTable")).findElements(By.className("password")).get(0).getText());
+		this.clickButton("deleteCredentialButton_1");
 	}
 
 	@Test
