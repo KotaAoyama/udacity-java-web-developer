@@ -181,6 +181,28 @@ class CloudStorageApplicationTests {
 		Assertions.assertNotEquals(encryptedPasswordVer1, passwords.get(0).getText());
 	}
 
+	@Test
+	@Order(8)
+	public void testDeleteCredential() {
+		signUp();
+		login();
+		goToPage("/home");
+		this.clickButton("nav-credentials-tab");
+		this.clickButton("addCredentialButton");
+		this.setValueToInput("https://udacity.com", "credential-url");
+		this.setValueToInput("kota", "credential-username");
+		this.setValueToInput("password", "credential-password");
+		this.clickButton("saveCredentialButton");
+		goToPage("/home");
+		WebElement tableBodyBeforeDeletingCredential = driver.findElement(By.id("credentialTable"));
+		List<WebElement> urlsBeforeDeletingCredential = tableBodyBeforeDeletingCredential.findElements(By.className("url"));
+		Assertions.assertEquals(1, urlsBeforeDeletingCredential.size());
+		this.clickButton("deleteCredentialButton_1");
+		goToPage("/home");
+		List<WebElement> urlsAfterDeletingCredential = driver.findElement(By.id("credentialTable")).findElements(By.className("url"));
+		Assertions.assertEquals(0, urlsAfterDeletingCredential.size());
+	}
+
 	private void goToPage(String path) {
 		driver.get("http://localhost:" + this.port + path);
 	}
