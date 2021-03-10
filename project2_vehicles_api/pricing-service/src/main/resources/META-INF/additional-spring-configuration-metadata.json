@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "instance.preferIpAddress",
+      "type": "java.lang.String",
+      "description": "Description for instance.preferIpAddress."
+  }
+] }
