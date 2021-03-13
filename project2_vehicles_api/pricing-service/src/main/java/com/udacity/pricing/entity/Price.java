@@ -19,29 +19,18 @@ public class Price {
     private BigDecimal price;
     private Long vehicleId;
 
-    public Price() {
-    }
-
     public Price(String currency, BigDecimal price, Long vehicleId) {
         this.currency = currency;
         this.price = price;
         this.vehicleId = vehicleId;
     }
 
-    public Price(Long id, String currency, BigDecimal price, Long vehicleId) {
-        this.id = id;
-        this.currency = currency;
-        this.price = price;
-        this.vehicleId = vehicleId;
+    public Price() {
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
     public String getCurrency() {
         return currency;
