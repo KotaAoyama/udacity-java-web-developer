@@ -2,6 +2,8 @@ package com.udacity.vehicles.domain.car;
 
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,7 +22,8 @@ public class Details {
     private String model;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = Manufacturer.class)
+    @JoinColumn(name = "code", insertable = false, updatable = false)
     private Manufacturer manufacturer;
 
     private Integer numberOfDoors;

@@ -1,7 +1,6 @@
 package com.udacity.vehicles.domain.manufacturer;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * Declares class to hold car manufacturer information.
@@ -10,7 +9,10 @@ import javax.persistence.Id;
 public class Manufacturer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "code")
     private Integer code;
+
     private String name;
 
     public Manufacturer() { }
